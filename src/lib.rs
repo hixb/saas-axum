@@ -10,12 +10,58 @@ use axum::{
     Router,
 };
 use tower_http::cors::{Any, CorsLayer};
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 use crate::{
     common::AppState,
     middleware::auth_middleware,
     modules::{auth, user},
 };
+
+/// OpenAPI documentation structure
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        auth::handlers::login_handler,
+        auth::handlers::register_handler,
+        user::handlers::get_current_user,
+        user::handlers::list_users,
+    ),
+    components(
+        schemas(
+            auth::dto::LoginRequest,
+            auth::dto::RegisterRequest,
+            auth::dto::AuthResponse,
+            auth::dto::UserInfo,
+            user::dto::UserProfile,
+            user::dto::UserListItem,
+        )
+    ),
+    tags(
+        (name = "Authentication", description = "Authentication endpoints for login and registration"),
+        (name = "Users", description = "User management endpoints")
+    ),
+    modifiers(&SecurityAddon)
+)]
+struct ApiDoc;
+
+struct SecurityAddon;
+
+impl utoipa::Modify for SecurityAddon {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        if let Some(components) = openapi.components.as_mut() {
+            components.add_security_scheme(
+                "bearer_auth",
+                utoipa::openapi::security::SecurityScheme::Http(
+                    utoipa::openapi::security::Http::new(
+                        utoipa::openapi::security::HttpAuthScheme::Bearer,
+                    ),
+                ),
+            )
+        }
+    }
+}
 
 /// Create and configure application router with all routes
 pub fn create_router(state: AppState) -> Router {
@@ -39,6 +85,7 @@ pub fn create_router(state: AppState) -> Router {
 
     // Combine all routes under /api prefix
     Router::new()
+        .merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .nest("/api", public_routes)
         .nest("/api", protected_routes)
         .layer(cors)

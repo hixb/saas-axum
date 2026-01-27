@@ -1,15 +1,27 @@
 use axum::{extract::State, Json};
+use utoipa;
 use validator::Validate;
 
 use crate::{
     common::{errors::Result, response::success, AppState},
     modules::auth::{
-        dto::{LoginRequest, RegisterRequest},
+        dto::{AuthResponse, LoginRequest, RegisterRequest},
         service,
     },
 };
 
 /// HTTP handler for login endpoint
+#[utoipa::path(
+    post,
+    path = "/api/auth/login",
+    request_body = LoginRequest,
+    responses(
+        (status = 200, description = "Login successful", body = AuthResponse),
+        (status = 401, description = "Invalid credentials"),
+        (status = 422, description = "Validation error")
+    ),
+    tag = "Authentication"
+)]
 pub async fn login_handler(
     State(state): State<AppState>,
     Json(payload): Json<LoginRequest>,
@@ -25,6 +37,17 @@ pub async fn login_handler(
 }
 
 /// HTTP handler for registration endpoint
+#[utoipa::path(
+    post,
+    path = "/api/auth/register",
+    request_body = RegisterRequest,
+    responses(
+        (status = 200, description = "Registration successful"),
+        (status = 409, description = "Username or email already exists"),
+        (status = 422, description = "Validation error")
+    ),
+    tag = "Authentication"
+)]
 pub async fn register_handler(
     State(state): State<AppState>,
     Json(payload): Json<RegisterRequest>,

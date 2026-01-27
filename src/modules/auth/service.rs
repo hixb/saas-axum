@@ -30,7 +30,7 @@ pub async fn login(db: &DatabaseConnection, req: LoginRequest, jwt_secret: &str,
     }
 
     // Generate JWT token with user claims
-    let claims = Claims::new(user.id, user.username.clone(), user.role_id.unwrap_or(0), jwt_exp);
+    let claims = Claims::new_access_token(user.id, user.username.clone(), user.role_id.unwrap_or(0), jwt_exp);
     let token = generate_token(&claims, jwt_secret)?;
 
     // Build authentication response

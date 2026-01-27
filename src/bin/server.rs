@@ -31,9 +31,13 @@ async fn main() {
         .unwrap_or_else(|_| "86400".to_string())
         .parse()
         .expect("JWT_EXPIRATION must be a number");
+    let refresh_token_expiration = std::env::var("REFRESH_TOKEN_EXPIRATION")
+        .unwrap_or_else(|_| "604800".to_string())
+        .parse()
+        .expect("REFRESH_TOKEN_EXPIRATION must be a number");
 
     // Create application state
-    let state = AppState::new(db_conn, jwt_secret, jwt_expiration);
+    let state = AppState::new(db_conn, jwt_secret, jwt_expiration, refresh_token_expiration);
 
     // Build router with all routes
     let app = create_router(state);

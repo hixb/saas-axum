@@ -1,0 +1,22 @@
+# Core Build Artifacts
+/target/
+
+# Environment Variables
+.env
+.env.local
+.env.*
+!.env.example
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Generated
+.DS_Store
+Thumbs.db
+
+# Backups & Temp
+**/*.rs.bk
+*.log

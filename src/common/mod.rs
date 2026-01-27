@@ -4,6 +4,7 @@ pub mod jwt;
 pub mod password;
 pub mod response;
 pub mod state;
+mod pagination;
 
 // Re-export commonly used types
 pub use errors::{AppError, Result};

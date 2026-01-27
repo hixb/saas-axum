@@ -12,7 +12,7 @@ pub enum AppError {
     #[error("Database error: {0}")]
     DatabaseError(#[from] sea_orm::DbErr),
 
-    #[error("Not found: {0}")]
+    #[error("Resource not found: {0}")]
     NotFound(String),
 
     #[error("Bad request: {0}")]
@@ -35,6 +35,15 @@ pub enum AppError {
 
     #[error("JWT error: {0}")]
     JwtError(#[from] jsonwebtoken::errors::Error),
+
+    #[error("Redis error: {0}")]
+    CacheError(String),
+
+    #[error("Rate limit exceeded")]
+    RateLimitExceeded,
+
+    #[error("Service unavailable")]
+    ServiceUnavailable,
 }
 
 /// Automatic conversion from anyhow::Error to AppError
@@ -49,7 +58,7 @@ impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, error_message) = match self {
             AppError::DatabaseError(e) => {
-                // Log database errors but don't expose details to client
+                // Log sensitive database errors but don't expose to client
                 tracing::error!("Database error: {:?}", e);
                 (StatusCode::INTERNAL_SERVER_ERROR, "Database error occurred".to_string())
             }
@@ -60,21 +69,33 @@ impl IntoResponse for AppError {
             AppError::Conflict(msg) => (StatusCode::CONFLICT, msg),
             AppError::ValidationError(msg) => (StatusCode::UNPROCESSABLE_ENTITY, msg),
             AppError::JwtError(e) => {
-                // Log JWT errors but return generic message
+                // Log JWT errors for security monitoring
                 tracing::error!("JWT error: {:?}", e);
-                (StatusCode::UNAUTHORIZED, "Invalid token".to_string())
+                (StatusCode::UNAUTHORIZED, "Invalid or expired token".to_string())
+            }
+            AppError::CacheError(msg) => {
+                // Log cache errors but continue serving requests
+                tracing::warn!("Cache error: {}", msg);
+                (StatusCode::INTERNAL_SERVER_ERROR, "Cache operation failed".to_string())
+            }
+            AppError::RateLimitExceeded => {
+                (StatusCode::TOO_MANY_REQUESTS, "Too many requests".to_string())
+            }
+            AppError::ServiceUnavailable => {
+                (StatusCode::SERVICE_UNAVAILABLE, "Service temporarily unavailable".to_string())
             }
             AppError::Internal(msg) => {
-                // Log internal errors but return generic message
+                // Log internal errors with full context
                 tracing::error!("Internal error: {}", msg);
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error".to_string())
             }
         };
 
-        // Return JSON error response
+        // Return structured JSON error response
         let body = Json(json!({
-            "success": false,
-            "error": error_message,
+            "code": status.as_u16(),
+            "message": error_message,
+            "timestamp": chrono::Utc::now().to_rfc3339(),
         }));
 
         (status, body).into_response()

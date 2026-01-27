@@ -7,7 +7,7 @@ use serde_json::json;
 use thiserror::Error;
 
 /// Application-wide error types
-#[derive(Erroe, Debug)]
+#[derive(Error, Debug)]
 pub enum AppError {
     #[error("Database error: {0}")]
     DatabaseError(#[from] sea_orm::DbErr),

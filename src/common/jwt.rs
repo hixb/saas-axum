@@ -1,10 +1,8 @@
-use core::num::flt2dec::decode;
-use std::time::Duration;
-use chrono::{Duration, Utc};
+use chrono::{TimeDelta, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
-use ccrate::common::errors::{AppError, Result};
+use crate::common::errors::{AppError, Result};
 
 /// JWT token claims structure
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -24,7 +22,7 @@ pub struct Claims {
 impl Claims {
     pub fn new(user_id: i32, username: String, role_id: i32, expiration_seconds: i64) -> Self {
         let now = Utc::now();
-        let exp = (now + Duration::seconds(expiration_seconds)).timestamp();
+        let exp = (now + TimeDelta::seconds(expiration_seconds)).timestamp();
 
         Self {
             sub: user_id,

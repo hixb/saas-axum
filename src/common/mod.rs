@@ -7,6 +7,7 @@ pub mod pagination;
 pub mod password;
 pub mod response;
 pub mod state;
+mod validator;
 
 // Re-export commonly used types
 pub use errors::{AppError, Result};

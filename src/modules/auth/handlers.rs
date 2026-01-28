@@ -1,5 +1,4 @@
 use axum::{extract::State, Json};
-use utoipa;
 use validator::Validate;
 
 use crate::{
@@ -10,7 +9,7 @@ use crate::{
     },
 };
 
-/// HTTP handler for login endpoint
+/// HTTP handler for user login
 #[utoipa::path(
     post,
     path = "/api/auth/login",
@@ -27,16 +26,17 @@ pub async fn login_handler(
     Json(payload): Json<LoginRequest>,
 ) -> Result<Json<impl serde::Serialize>> {
     // Validate request payload
-    payload.validate()
+    payload
+        .validate()
         .map_err(|e| crate::common::errors::AppError::ValidationError(e.to_string()))?;
 
-    // Process login through service layer
+    // Process login
     let response = service::login(&state.db, payload, &state.jwt_secret, state.jwt_expiration).await?;
 
     Ok(Json(success(response)))
 }
 
-/// HTTP handler for registration endpoint
+/// HTTP handler for user registration
 #[utoipa::path(
     post,
     path = "/api/auth/register",
@@ -53,14 +53,15 @@ pub async fn register_handler(
     Json(payload): Json<RegisterRequest>,
 ) -> Result<Json<impl serde::Serialize>> {
     // Validate request payload
-    payload.validate()
+    payload
+        .validate()
         .map_err(|e| crate::common::errors::AppError::ValidationError(e.to_string()))?;
 
-    // Process registration through service layer
+    // Process registration
     let user_id = service::register(&state.db, payload).await?;
 
     Ok(Json(success(serde_json::json!({
         "user_id": user_id,
-        "message": "Registration successful"
+        "message": "Registration successful. Please login."
     }))))
 }

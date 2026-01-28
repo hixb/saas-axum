@@ -1,5 +1,5 @@
 use chrono::{Duration, Utc};
-use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation, decode, encode};
 use serde::{Deserialize, Serialize};
 
 use crate::common::errors::{AppError, Result};
@@ -103,7 +103,7 @@ pub fn generate_token(claims: &Claims, secret: &str) -> Result<String> {
         claims,
         &EncodingKey::from_secret(secret.as_bytes()),
     )
-        .map_err(AppError::from)
+    .map_err(AppError::from)
 }
 
 /// Verify and decode JWT token
@@ -113,7 +113,7 @@ pub fn verify_token(token: &str, secret: &str) -> Result<Claims> {
         &DecodingKey::from_secret(secret.as_bytes()),
         &Validation::default(),
     )
-        .map_err(AppError::from)?;
+    .map_err(AppError::from)?;
 
     // Check if token is expired
     if token_data.claims.is_expired() {

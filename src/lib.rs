@@ -5,9 +5,9 @@ pub mod middleware;
 pub mod modules;
 
 use axum::{
+    Router,
     middleware::from_fn_with_state,
     routing::{get, post},
-    Router,
 };
 use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;

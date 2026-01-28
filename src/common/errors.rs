@@ -1,7 +1,7 @@
-use axum:: {
+use axum::{
+    Json,
     http::StatusCode,
     response::{IntoResponse, Response},
-    Json,
 };
 use serde_json::json;
 use thiserror::Error;
@@ -60,7 +60,10 @@ impl IntoResponse for AppError {
             AppError::DatabaseError(e) => {
                 // Log sensitive database errors but don't expose to client
                 tracing::error!("Database error: {:?}", e);
-                (StatusCode::INTERNAL_SERVER_ERROR, "Database error occurred".to_string())
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Database error occurred".to_string(),
+                )
             }
             AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
             AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg),
@@ -71,23 +74,34 @@ impl IntoResponse for AppError {
             AppError::JwtError(e) => {
                 // Log JWT errors for security monitoring
                 tracing::error!("JWT error: {:?}", e);
-                (StatusCode::UNAUTHORIZED, "Invalid or expired token".to_string())
+                (
+                    StatusCode::UNAUTHORIZED,
+                    "Invalid or expired token".to_string(),
+                )
             }
             AppError::CacheError(msg) => {
                 // Log cache errors but continue serving requests
                 tracing::warn!("Cache error: {}", msg);
-                (StatusCode::INTERNAL_SERVER_ERROR, "Cache operation failed".to_string())
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Cache operation failed".to_string(),
+                )
             }
-            AppError::RateLimitExceeded => {
-                (StatusCode::TOO_MANY_REQUESTS, "Too many requests".to_string())
-            }
-            AppError::ServiceUnavailable => {
-                (StatusCode::SERVICE_UNAVAILABLE, "Service temporarily unavailable".to_string())
-            }
+            AppError::RateLimitExceeded => (
+                StatusCode::TOO_MANY_REQUESTS,
+                "Too many requests".to_string(),
+            ),
+            AppError::ServiceUnavailable => (
+                StatusCode::SERVICE_UNAVAILABLE,
+                "Service temporarily unavailable".to_string(),
+            ),
             AppError::Internal(msg) => {
                 // Log internal errors with full context
                 tracing::error!("Internal error: {}", msg);
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error".to_string())
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Internal server error".to_string(),
+                )
             }
         };
 

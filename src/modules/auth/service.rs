@@ -3,10 +3,10 @@ use sea_orm::*;
 use crate::{
     common::{
         errors::{AppError, Result},
-        jwt::{generate_token, Claims},
+        jwt::{Claims, generate_token},
         password::{hash_password, verify_password},
     },
-    entity::{users, roles},
+    entity::{roles, users},
     modules::auth::dto::{AuthResponse, LoginRequest, RegisterRequest, UserInfo},
 };
 
@@ -61,10 +61,7 @@ pub async fn login(
 }
 
 /// Handle user registration
-pub async fn register(
-    db: &DatabaseConnection,
-    req: RegisterRequest,
-) -> Result<i32> {
+pub async fn register(db: &DatabaseConnection, req: RegisterRequest) -> Result<i32> {
     // Check username uniqueness
     let existing_user = users::Entity::find()
         .filter(users::Column::Username.eq(&req.username))

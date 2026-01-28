@@ -1,5 +1,8 @@
 use dotenvy::dotenv;
-use saas_axum::{common::{db, AppState}, create_router};
+use saas_axum::{
+    common::{AppState, db},
+    create_router,
+};
 use std::net::SocketAddr;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -37,7 +40,12 @@ async fn main() {
         .expect("REFRESH_TOKEN_EXPIRATION must be a number");
 
     // Create application state
-    let state = AppState::new(db_conn, jwt_secret, jwt_expiration, refresh_token_expiration);
+    let state = AppState::new(
+        db_conn,
+        jwt_secret,
+        jwt_expiration,
+        refresh_token_expiration,
+    );
 
     // Build router with all routes
     let app = create_router(state);

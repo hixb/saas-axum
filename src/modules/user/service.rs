@@ -1,9 +1,9 @@
 use sea_orm::*;
 
 use crate::{
-    common::{errors::{AppError, Result}},
+    common::errors::{AppError, Result},
     entity::users,
-    modules::user::dto::{UserProfile, UserListItem},
+    modules::user::dto::{UserListItem, UserProfile},
 };
 
 /// Get user profile by ID
@@ -26,16 +26,17 @@ pub async fn get_user_by_id(db: &DatabaseConnection, user_id: i32) -> Result<Use
 
 /// Get list of all users
 pub async fn list_users(db: &DatabaseConnection) -> Result<Vec<UserListItem>> {
-    let users = users::Entity::find()
-        .all(db)
-        .await?;
+    let users = users::Entity::find().all(db).await?;
 
-    Ok(users.into_iter().map(|user| UserListItem {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        nickname: user.nickname,
-        role_id: user.role_id,
-        status: user.status,
-    }).collect())
+    Ok(users
+        .into_iter()
+        .map(|user| UserListItem {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            nickname: user.nickname,
+            role_id: user.role_id,
+            status: user.status,
+        })
+        .collect())
 }

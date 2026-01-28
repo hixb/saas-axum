@@ -1,6 +1,6 @@
 use argon2::{
-    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
+    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString, rand_core::OsRng},
 };
 
 use crate::common::errors::{AppError, Result};
@@ -36,41 +36,41 @@ pub fn verify_password(password: &str, hash: &str) -> Result<bool> {
 pub fn validate_password_strength(password: &str) -> Result<()> {
     if password.len() < 8 {
         return Err(AppError::ValidationError(
-            "Password must be at least 8 characters long".to_string()
+            "Password must be at least 8 characters long".to_string(),
         ));
     }
 
     if password.len() > 128 {
         return Err(AppError::ValidationError(
-            "Password must not exceed 128 characters".to_string()
+            "Password must not exceed 128 characters".to_string(),
         ));
     }
 
     // Check for at least one uppercase letter
     if !password.chars().any(|c| c.is_uppercase()) {
         return Err(AppError::ValidationError(
-            "Password must contain at least one uppercase letter".to_string()
+            "Password must contain at least one uppercase letter".to_string(),
         ));
     }
 
     // Check for at least one lowercase letter
     if !password.chars().any(|c| c.is_lowercase()) {
         return Err(AppError::ValidationError(
-            "Password must contain at least one lowercase letter".to_string()
+            "Password must contain at least one lowercase letter".to_string(),
         ));
     }
 
     // Check for at least one digit
     if !password.chars().any(|c| c.is_numeric()) {
         return Err(AppError::ValidationError(
-            "Password must contain at least one number".to_string()
+            "Password must contain at least one number".to_string(),
         ));
     }
 
     // Check for at least one special character
     if !password.chars().any(|c| !c.is_alphanumeric()) {
         return Err(AppError::ValidationError(
-            "Password must contain at least one special character".to_string()
+            "Password must contain at least one special character".to_string(),
         ));
     }
 

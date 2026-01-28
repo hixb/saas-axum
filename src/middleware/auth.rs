@@ -1,11 +1,11 @@
 use axum::{
     extract::{Request, State},
-    http::{header, StatusCode},
+    http::{StatusCode, header},
     middleware::Next,
     response::Response,
 };
 
-use crate::common::{jwt::verify_token, AppState};
+use crate::common::{AppState, jwt::verify_token};
 
 /// Middleware to verify JWT token and inject user claims into request
 pub async fn auth_middleware(
@@ -26,8 +26,7 @@ pub async fn auth_middleware(
         .ok_or(StatusCode::UNAUTHORIZED)?;
 
     // Verify token and extract claims
-    let claims = verify_token(token, &state.jwt_secret)
-        .map_err(|_| StatusCode::UNAUTHORIZED)?;
+    let claims = verify_token(token, &state.jwt_secret).map_err(|_| StatusCode::UNAUTHORIZED)?;
 
     // Inject claims into request extensions for downstream handlers
     req.extensions_mut().insert(claims);

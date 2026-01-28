@@ -1,8 +1,11 @@
-use axum::{extract::State, Extension, Json};
+use axum::{Extension, Json, extract::State};
 
 use crate::{
-    common::{errors::Result, jwt::Claims, response::success, AppState},
-    modules::user::{dto::{UserProfile, UserListItem}, service},
+    common::{AppState, errors::Result, jwt::Claims, response::success},
+    modules::user::{
+        dto::{UserListItem, UserProfile},
+        service,
+    },
 };
 
 /// Get current authenticated user profile
@@ -41,9 +44,7 @@ pub async fn get_current_user(
         ("bearer_auth" = [])
     )
 )]
-pub async fn list_users(
-    State(state): State<AppState>,
-) -> Result<Json<impl serde::Serialize>> {
+pub async fn list_users(State(state): State<AppState>) -> Result<Json<impl serde::Serialize>> {
     let users = service::list_users(&state.db).await?;
 
     Ok(Json(success(users)))

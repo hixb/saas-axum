@@ -1,8 +1,8 @@
-use axum::{extract::State, Json};
+use axum::{Json, extract::State};
 use validator::Validate;
 
 use crate::{
-    common::{errors::Result, response::success, AppState},
+    common::{AppState, errors::Result, response::success},
     modules::auth::{
         dto::{AuthResponse, LoginRequest, RegisterRequest},
         service,
@@ -31,7 +31,8 @@ pub async fn login_handler(
         .map_err(|e| crate::common::errors::AppError::ValidationError(e.to_string()))?;
 
     // Process login
-    let response = service::login(&state.db, payload, &state.jwt_secret, state.jwt_expiration).await?;
+    let response =
+        service::login(&state.db, payload, &state.jwt_secret, state.jwt_expiration).await?;
 
     Ok(Json(success(response)))
 }
